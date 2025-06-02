@@ -1,0 +1,11 @@
+***** Currency Conversion Calculations *****
+Generated: 02/06/2025
+
+Here is your conversion history (oldest to newest)...
+
+10.0 NZD is 5.9 USD
+10.0 NZD is 8.2 CAD
+10.0 NZD is 5.9 USD
+10.0 NZD is 8.2 CAD
+10.0 NZD is 5.9 USD
+10.0 NZD is 8.2 CAD
