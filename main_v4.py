@@ -7,29 +7,37 @@ MAX_CALCS = 5  # Maximum number of calculations to display in history
 EXPORT_FILENAME = "currency_conversions.txt"
 
 # --- Currency Conversion Functions ---
+
 def round_currency(val):
     """
-    Rounds currency to the nearest tenth (0.1)
-    :param val: Number to be rounded
-    :return: String formatted to one decimal place
+    Rounds a given number to the nearest tenth and formats it as a string.
     """
     val_rounded = round(val * 10) / 10  # Round to nearest 0.1
     return "{:.1f}".format(val_rounded)
 
 def convert_to_usd(nzd_amount):
+    """
+    Converts NZD to USD using a fixed exchange rate.
+    """
     exchange_rate = 0.59
     usd = nzd_amount * exchange_rate
     return round_currency(usd)
 
 def convert_to_cad(nzd_amount):
+    """
+    Converts NZD to CAD using a fixed exchange rate.
+    """
     exchange_rate = 0.82
     cad = nzd_amount * exchange_rate
     return round_currency(cad)
 
-
 # --- GUI Classes ---
+
 class Converter:
     def __init__(self, master):
+        """
+        Initializes the main converter window with input, buttons, and layout.
+        """
         self.all_calculations_list = []
 
         self.answer_error = Frame(master, padx=10, pady=10)
@@ -78,6 +86,9 @@ class Converter:
         self.button_ref_list[3].config(state=DISABLED)
 
     def check_amount(self, currency_type):
+        """
+        Validates input and triggers conversion if the input is valid.
+        """
         to_convert = self.temp_entry.get()
 
         # --- LIMIT TO 7 DIGITS MAXIMUM ---
@@ -85,15 +96,14 @@ class Converter:
             self.output_label.config(text="Amount must be 7 digits or fewer", fg="#9C0000")
             self.temp_entry.config(bg="#F4CCCC")
             return
-        # ----------------------------------
 
         try:
             to_convert = float(to_convert)
-            if to_convert > 0:
+            if to_convert >= 1:
                 error = ""
                 self.convert(to_convert, currency_type)
             else:
-                error = "Amount must be greater than 0"
+                error = "Amount must be at least 1 NZD or more"
         except ValueError:
             error = "Please enter a valid number"
 
@@ -104,6 +114,9 @@ class Converter:
             self.temp_entry.config(bg="white")
 
     def convert(self, amount, currency_type):
+        """
+        Converts the amount to the specified currency and displays the result.
+        """
         if currency_type == "USD":
             converted = convert_to_usd(amount)
         elif currency_type == "CAD":
@@ -119,14 +132,23 @@ class Converter:
         self.button_ref_list[3].config(state=NORMAL)  # Enable History/Export
 
     def to_help(self):
+        """
+        Opens the Help/Info window.
+        """
         DisplayHelp(self)
 
     def to_history(self):
+        """
+        Opens the History/Export window.
+        """
         HistoryExport(self, self.all_calculations_list)
 
 
 class DisplayHelp:
     def __init__(self, partner):
+        """
+        Creates the Help window with usage instructions.
+        """
         background = "#ffe6cc"
         self.help_box = Toplevel()
         partner.button_ref_list[2].config(state=DISABLED)
@@ -143,7 +165,11 @@ class DisplayHelp:
 
         help_text = (
             "To use the program, enter the amount of money in New Zealand Dollars (NZD) "
-            "that you want to convert.\n\nThen choose the target currency — either US Dollars (USD) or Canadian Dollars (CAD).\n\nAfter selecting the currency, click the 'Convert' button to see the converted amount.\n\nTo view your conversion history or export it to a text file, click the 'History / Export' button.\n\nNote: Make sure all amounts entered are positive numbers, and 7 or less digits.\n\n(This currency converter does not use live rates, 1NZD=0.59USD, 1NZD=0.82CAD)"
+            "that you want to convert.\n\nThen choose the target currency — either US Dollars (USD) or Canadian Dollars (CAD).\n\n"
+            "After selecting the currency, you will be able to see the converted amount.\n\n"
+            "To view your conversion history or export it to a text file, click the 'History / Export' button.\n\n"
+            "Note: Make sure all amounts entered are positive numbers, and 7 or less digits with .\n\n"
+            "(This currency converter does not use live rates, 1NZD=0.59USD, 1NZD=0.82CAD)"
         )
 
         self.help_text_label = Label(self.help_frame, text=help_text,
@@ -159,13 +185,18 @@ class DisplayHelp:
             item.config(bg=background)
 
     def close_help(self, partner):
+        """
+        Closes the Help window and re-enables the Help button.
+        """
         partner.button_ref_list[2].config(state=NORMAL)
         self.help_box.destroy()
 
 
 class HistoryExport:
     def __init__(self, partner, calculations):
-        # Get a safe copy of the most recent calculations (last 5, reversed for display)
+        """
+        Creates the History/Export window to show recent conversions and allow exporting.
+        """
         self.calculations = calculations[-MAX_CALCS:]
         display_calculations = list(reversed(self.calculations))
 
@@ -176,7 +207,6 @@ class HistoryExport:
         self.history_frame = Frame(self.history_box)
         self.history_frame.grid()
 
-        # Decide background and message based on how many calculations exist
         if len(calculations) <= MAX_CALCS:
             calc_back = "#D5E8D4"
             calc_amount = "all your"
@@ -185,13 +215,10 @@ class HistoryExport:
             calc_amount = f"your recent calculations - showing {MAX_CALCS} / {len(calculations)}"
 
         recent_intro_txt = f"Below are {calc_amount} currency conversions."
-
-        # Join calculations for display (newest at top)
         newest_first_string = "\n".join(display_calculations)
 
         export_instruction_txt = (
-            "Please push <Export> to save your conversions in a text file. "
-            "If the filename already exists, it will be overwritten."
+            "Please push <Export> to save your conversions in a text file..."
         )
 
         history_labels_list = [
@@ -223,6 +250,9 @@ class HistoryExport:
                    command=btn[2]).grid(row=btn[3], column=btn[4], padx=10, pady=10)
 
     def export_to_file(self):
+        """
+        Exports the list of recent calculations to a text file.
+        """
         try:
             with open(EXPORT_FILENAME, "a") as f:
                 f.write("***** Currency Conversion Calculations *****\n")
@@ -236,6 +266,9 @@ class HistoryExport:
             self.export_status_label.config(text=f"Export failed: {e}", fg="red")
 
     def close_history(self, partner):
+        """
+        Closes the History/Export window and re-enables the button.
+        """
         partner.button_ref_list[3].config(state=NORMAL)
         self.history_box.destroy()
 
